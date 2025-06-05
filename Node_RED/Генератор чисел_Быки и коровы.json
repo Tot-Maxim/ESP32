@@ -1,0 +1,205 @@
+[
+    {
+        "id": "ebde823abba13d59",
+        "type": "tab",
+        "label": "Поток 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "1a1a1a1a1a1a1a1a",
+        "type": "tab",
+        "label": "Генератор чисел",
+        "disabled": true,
+        "info": ""
+    },
+    {
+        "id": "2eeb7581fdc72645",
+        "type": "tab",
+        "label": "Быки и коровы",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "group1",
+        "type": "ui_group",
+        "name": "Игра",
+        "tab": "tab1",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "tab1",
+        "type": "ui_tab",
+        "name": "Быки и коровы",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "button1",
+        "type": "ui_button",
+        "z": "1a1a1a1a1a1a1a1a",
+        "name": "Генерировать число",
+        "group": "group1",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "🎲 Сгенерировать",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "topicType": "str",
+        "x": 160,
+        "y": 100,
+        "wires": [
+            [
+                "randomFunction"
+            ]
+        ]
+    },
+    {
+        "id": "randomFunction",
+        "type": "function",
+        "z": "1a1a1a1a1a1a1a1a",
+        "name": "Случайное число",
+        "func": "let min = 1;\nlet max = 100;\nmsg.payload = Math.floor(Math.random() * (max - min + 1)) + min;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 100,
+        "wires": [
+            [
+                "textOutput"
+            ]
+        ]
+    },
+    {
+        "id": "textOutput",
+        "type": "ui_text",
+        "z": "1a1a1a1a1a1a1a1a",
+        "group": "group1",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "Результат",
+        "label": "Ваше число:",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 570,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "c66d348b7e676895",
+        "type": "ui_button",
+        "z": "2eeb7581fdc72645",
+        "name": "Новая игра",
+        "group": "group1",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "🔁 Новая игра",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "",
+        "x": 140,
+        "y": 80,
+        "wires": [
+            [
+                "271502fbe11db807"
+            ]
+        ]
+    },
+    {
+        "id": "271502fbe11db807",
+        "type": "function",
+        "z": "2eeb7581fdc72645",
+        "name": "Загадать число",
+        "func": "function generateNumber() {\n    let digits = [];\n    while (digits.length < 4) {\n        let d = Math.floor(Math.random() * 10);\n        if (!digits.includes(d)) {\n            digits.push(d);\n        }\n    }\n    return digits.join(\"\");\n}\n\nlet secret = generateNumber();\nflow.set(\"secretNumber\", secret);\nmsg.payload = \"Новая игра началась! Загадано 4-значное число.\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 360,
+        "y": 80,
+        "wires": [
+            [
+                "d8ccefd6a714ba53"
+            ]
+        ]
+    },
+    {
+        "id": "14d6efd0326e942c",
+        "type": "ui_text_input",
+        "z": "2eeb7581fdc72645",
+        "name": "Ввод числа",
+        "label": "Введите число:",
+        "tooltip": "",
+        "group": "group1",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "mode": "text",
+        "delay": 300,
+        "topic": "",
+        "x": 140,
+        "y": 140,
+        "wires": [
+            [
+                "469244f70c3d768e"
+            ]
+        ]
+    },
+    {
+        "id": "469244f70c3d768e",
+        "type": "function",
+        "z": "2eeb7581fdc72645",
+        "name": "Проверить",
+        "func": "let guess = msg.payload;\nlet secret = flow.get(\"secretNumber\");\n\nif (!/^[0-9]{4}$/.test(guess)) {\n    msg.payload = \"Введите 4-значное число без букв.\";\n    return msg;\n}\n\nlet bulls = 0, cows = 0;\nfor (let i = 0; i < 4; i++) {\n    if (guess[i] === secret[i]) {\n        bulls++;\n    } else if (secret.includes(guess[i])) {\n        cows++;\n    }\n}\n\nif (bulls === 4) {\n    msg.payload = `🎉 Вы угадали число ${secret}!`;\n} else {\n    msg.payload = `${guess} — ${bulls} бык(ов), ${cows} коров(ы)`;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 360,
+        "y": 140,
+        "wires": [
+            [
+                "d8ccefd6a714ba53"
+            ]
+        ]
+    },
+    {
+        "id": "d8ccefd6a714ba53",
+        "type": "ui_text",
+        "z": "2eeb7581fdc72645",
+        "group": "group1",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Результат",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 580,
+        "y": 100,
+        "wires": []
+    }
+]
